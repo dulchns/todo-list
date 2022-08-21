@@ -10,25 +10,58 @@ if (localStorage.getItem('todolist')) {
     renderItems()
 }
 
-function createNewElement(itemText) {
+function checkItem() {
+  todos = todos.map(s => {
+    if(s === this) {
+      s.state = this.state === 0 ? 1 : 0
+    }
 
-    let listItem = document.createElement('li')
+    return s
+  })
+
+  renderItems()
+}
+
+function deleteItem() {
+  todos = todos.filter(s => s !== this)
+  renderItems()
+}
+
+function editItem() {
+  todos = todos.map(s => {
+    if(s === this) {
+      s.isEditing = true
+    }
+
+    return s
+  })
+
+  renderItems()
+}
+
+function editItemComplete() {
+  console.log('++ 2 ++')
+}
+
+
+function createNewElement(item) {
+    const listItem = document.createElement('li')
     listItem.classList.add('item')
     let listItemLabel = document.createElement('label')
 
-    let listItemCheckbox = document.createElement('input')
+    const listItemCheckbox = document.createElement('input')
     listItemCheckbox.type = 'checkbox'
     listItemCheckbox.classList.add('item-check')
 
-    let listItemSpan = document.createElement('span')
-    listItemSpan.textContent = itemText
-    listItemSpan.classList.add('item-text');
+    const listItemSpan = document.createElement('span')
+    listItemSpan.textContent = item.text
+    listItemSpan.classList.add('item-text')
 
-    let editButton = document.createElement('span')
+    const editButton = document.createElement('span')
     editButton.innerHTML = '&#110;'
     editButton.classList.add('edit-button')
 
-    let deleteButton = document.createElement('span')
+    const deleteButton = document.createElement('span')
     deleteButton.innerHTML = '&#111;'
     deleteButton.classList.add('delete-button')
 
@@ -38,22 +71,28 @@ function createNewElement(itemText) {
     listItem.appendChild(editButton)
     listItem.appendChild(deleteButton)
 
-    return listItem
+    return {
+      textContent: listItemSpan,
+      checkbox: listItemCheckbox,
+      deleteButton,
+      editButton,
+      element: listItem
+    }
 }
 
 function renderItems() {
-
     toDoList.innerHTML = ''
     localStorage.setItem('todolist', JSON.stringify(todos))
-    
-    for (let key in todos) {
 
-        let element = createNewElement(todos[key].item)
-        let textContent = element.querySelector('span')
-        let checkbox = element.querySelector('input')
-        let deleteButton = element.querySelectorAll('span')[2]
-        let editButton = element.querySelector('.edit-button')
-        
+    for (let key in todos) {
+        const {
+          textContent,
+          checkbox,
+          deleteButton,
+          editButton,
+          element
+        } = createNewElement(todos[key])
+
         if (todos[key].state === 1) {
             checkbox.checked = true
             textContent.style.textDecoration = 'line-through'
@@ -62,7 +101,10 @@ function renderItems() {
             textContent.style.textDecoration = 'none'
         }
 
-        editItems(todos[key], checkbox, deleteButton, editButton, textContent, element)
+        checkbox.addEventListener('change', checkItem.bind(todos[key]))
+        deleteButton.addEventListener('click', deleteItem.bind(todos[key]))
+        editButton.addEventListener('click', editItem.bind(todos[key]))
+
         toDoList.appendChild(element)
 
     }
@@ -77,47 +119,6 @@ function renderItems() {
 
 }
 
-
-function editItems(item, check, del, edit, text, el) {
-
-    function checkItem() {
-
-        if (check.checked) this.state = 1
-        else this.state = 0
-
-        renderItems()
-    }
-
-    function deleteItem() {
-        todos = todos.filter(s => s !== this)
-        renderItems()
-    }
-
-
-    check.addEventListener('change', checkItem.bind(item))
-    del.addEventListener('click', deleteItem.bind(item))
-    edit.addEventListener('click', function() {
-
-        el.innerHTML = `<input class="tmp-input" type="text" value="${text.textContent}" maxlength="25"><i class="tmp-edit">&#217;</i>`
-        let acceptChange = el.querySelector('i')
-
-        acceptChange.addEventListener('click', function() {
-            if(el.querySelector('.item > input').value.length !== 0) {
-                item.item = el.querySelector('.item > input').value
-                renderItems()
-            } else renderItems()
-        })
-
-        addEventListener('keydown', function(evt) {
-            if(evt.code === 'Enter') {
-                if(el.querySelector('.item > input').value.length !== 0) {
-                    item.item = el.querySelector('.item > input').value
-                    renderItems()
-                } else renderItems()
-            }
-        })
-    })
-}
 
 checkboxAll.addEventListener('click', function () {
     for (let i = 0; i < todos.length; i++) {
