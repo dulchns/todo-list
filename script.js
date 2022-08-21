@@ -3,7 +3,6 @@ let listItems = toDoList.children
 let addItemForm = document.querySelector('form')
 let newItemInput = addItemForm.querySelector('input')
 let checkboxAll = document.querySelector('.check-all-checkbox')
-
 let todos = []
 
 if (localStorage.getItem('todolist')) {
@@ -46,7 +45,7 @@ function renderItems() {
 
     toDoList.innerHTML = ''
     localStorage.setItem('todolist', JSON.stringify(todos))
-
+    
     for (let key in todos) {
 
         let element = createNewElement(todos[key].item)
@@ -54,7 +53,7 @@ function renderItems() {
         let checkbox = element.querySelector('input')
         let deleteButton = element.querySelectorAll('span')[2]
         let editButton = element.querySelector('.edit-button')
-
+        
         if (todos[key].state === 1) {
             checkbox.checked = true
             textContent.style.textDecoration = 'line-through'
@@ -66,6 +65,14 @@ function renderItems() {
         editItems(todos[key], checkbox, deleteButton, editButton, textContent, element)
         toDoList.appendChild(element)
 
+    }
+
+    for(let key in todos) {
+        if(todos[key].state === 1) checkboxAll.checked = true
+        else {
+            checkboxAll.checked = false
+            break
+        }
     }
 
 }
